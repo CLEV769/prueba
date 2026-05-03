@@ -117,7 +117,7 @@
       </div>
     </div>
 
-    <button class="btn" id="btnLogin" onclick="login()">Iniciar sesión</button>
+    <button class="btn" id="btnLogin" type="button">Iniciar sesión</button>
     <div class="msg" id="msg"></div>
 
     <div class="footer-link">
@@ -166,6 +166,7 @@
       }
     }
 
+    document.getElementById('btnLogin').addEventListener('click', login);
     document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
   </script>
 </body>

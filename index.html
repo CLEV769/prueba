@@ -170,7 +170,7 @@
       </div>
     </div>
 
-    <button class="btn" id="btnRegistro" onclick="registrar()">Crear cuenta</button>
+    <button class="btn" id="btnRegistro" type="button">Crear cuenta</button>
     <div class="msg" id="msg"></div>
 
     <div class="footer-link">
@@ -230,6 +230,8 @@
         btn.innerHTML = 'Crear cuenta';
       }
     }
+
+    document.getElementById('btnRegistro').addEventListener('click', registrar);
   </script>
 </body>
 </html>
