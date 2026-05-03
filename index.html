@@ -1,428 +1,235 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Registro</title>
-    <meta name="description" content="Formulario de registro de usuarios">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro — Mi App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            padding: 20px;
-        }
+    :root {
+      --violet: #7c3aed;
+      --violet-dark: #6d28d9;
+      --cyan: #06b6d4;
+      --bg1: #0f0c29;
+      --bg2: #302b63;
+      --bg3: #24243e;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --text: #f1f0ff;
+      --text-muted: rgba(241,240,255,0.5);
+      --success-bg: rgba(16,185,129,0.15);
+      --success-border: rgba(16,185,129,0.4);
+      --error-bg: rgba(239,68,68,0.15);
+      --error-border: rgba(239,68,68,0.4);
+    }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes float {
+      0%,100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
 
-        /* Círculos decorativos de fondo */
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.3;
-            z-index: 0;
-        }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: linear-gradient(-45deg, var(--bg1), var(--bg2), var(--bg3), #1a1040);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-        body::before {
-            width: 400px;
-            height: 400px;
-            background: #7c3aed;
-            top: -100px;
-            right: -100px;
-        }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; animation: float 9s ease-in-out infinite; }
+    .blob-1 { width: 420px; height: 420px; background: var(--violet); top: -100px; right: -80px; }
+    .blob-2 { width: 350px; height: 350px; background: var(--cyan); bottom: -80px; left: -60px; animation-delay: -4s; }
 
-        body::after {
-            width: 350px;
-            height: 350px;
-            background: #06b6d4;
-            bottom: -80px;
-            left: -80px;
-        }
+    .card {
+      position: relative; z-index: 10; width: 100%; max-width: 460px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 44px 40px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+      animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
 
-        .form-container {
-            position: relative;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: 48px 40px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.6s ease-out;
-        }
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--violet), var(--cyan));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.3px; }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; margin-top: 20px; }
+    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
 
-        .form-container h1 {
-            text-align: center;
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
 
-        .form-container p.subtitle {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.55);
-            font-size: 14px;
-            margin-bottom: 36px;
-        }
+    input {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 13px 14px 13px 42px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    input::placeholder { color: var(--text-muted); }
+    input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); background: rgba(255,255,255,0.08); }
 
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
+    .btn {
+      width: 100%; margin-top: 8px; padding: 14px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, var(--violet), var(--violet-dark));
+      color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+      letter-spacing: 0.3px; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.45); }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
-        .input-group label {
-            display: block;
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            letter-spacing: 0.3px;
-        }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
 
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            padding-left: 44px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
+    .msg { display: none; margin-top: 16px; padding: 13px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; animation: fadeIn 0.3s ease both; }
+    .msg.success { display: block; background: var(--success-bg); border: 1px solid var(--success-border); color: #6ee7b7; }
+    .msg.error   { display: block; background: var(--error-bg);   border: 1px solid var(--error-border);   color: #fca5a5; }
 
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
+    .footer-link { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted); }
+    .footer-link a { color: #a78bfa; text-decoration: none; font-weight: 500; transition: color 0.2s; }
+    .footer-link a:hover { color: #fff; }
 
-        .input-group input:focus {
-            border-color: #7c3aed;
-            background: rgba(124, 58, 237, 0.08);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
-        }
-
-        .input-group .icon {
-            position: absolute;
-            left: 14px;
-            top: 41px;
-            font-size: 16px;
-            opacity: 0.5;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 12px;
-            letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, #6d28d9, #5b21b6);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Mensaje de respuesta */
-        .message {
-            margin-top: 20px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message.success {
-            display: block;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34d399;
-        }
-
-        .message.error {
-            display: block;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-
-        /* Spinner en el botón */
-        .spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive */
-        @media (max-width: 520px) {
-            .form-container {
-                padding: 32px 24px;
-            }
-            .form-container h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+    @media (max-width: 520px) { .card { padding: 32px 24px; } h1 { font-size: 22px; } }
+  </style>
 </head>
 <body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
 
-    <div class="form-container">
-        <h1>📋 Registro</h1>
-        <p class="subtitle">Completa el formulario para crear tu cuenta</p>
-
-        <form id="registroForm">
-            <div class="input-group">
-                <label for="nombre">Nombre completo</label>
-                <span class="icon">👤</span>
-                <input 
-                    type="text" 
-                    id="nombre" 
-                    name="nombre" 
-                    placeholder="Ej: Juan Pérez" 
-                    required 
-                    minlength="3"
-                >
-            </div>
-
-            <div class="input-group">
-                <label for="email">Correo electrónico</label>
-                <span class="icon">📧</span>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="Ej: juan@correo.com" 
-                    required
-                >
-            </div>
-
-            <div class="input-group">
-                <label for="telefono">Teléfono</label>
-                <span class="icon">📱</span>
-                <input 
-                    type="tel" 
-                    id="telefono" 
-                    name="telefono" 
-                    placeholder="Ej: 3001234567" 
-                    required
-                >
-            </div>
-
-            <div class="input-group">
-                <label for="documento">Documento</label>
-                <span class="icon">🪪</span>
-                <input 
-                    type="text" 
-                    id="documento" 
-                    name="documento" 
-                    placeholder="Ej: 1234567890" 
-                    required
-                >
-            </div>
-
-            <div class="input-group">
-                <label for="contrasena">Contraseña</label>
-                <span class="icon">🔒</span>
-                <input 
-                    type="password" 
-                    id="contrasena" 
-                    name="contrasena" 
-                    placeholder="Mínimo 6 caracteres" 
-                    required 
-                    minlength="6"
-                >
-            </div>
-
-            <button type="submit" class="btn-submit" id="btnSubmit">
-                Registrarse
-            </button>
-
-            <div id="mensaje" class="message"></div>
-        </form>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">Mi App</span>
     </div>
 
-    <!-- ============================================= -->
-    <!-- SUPABASE: SDK cargado desde CDN               -->
-    <!-- ============================================= -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <h1>Crear cuenta</h1>
+    <p class="subtitle">Completa tus datos para registrarte</p>
 
-    <script>
-        // =============================================
-        // 🔑 CREDENCIALES DE SUPABASE
-        // =============================================
-        const SUPABASE_URL = 'https://hfljxypougtleafgfhsf.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmbGp4eXBvdWd0bGVhZmdmaHNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzczODksImV4cCI6MjA5Mjk1MzM4OX0.GkW2NjuJ0tS1AzE5GuyCZVIFoS0iHxl6wRvd_frWwsI';
+    <div class="field">
+      <label>Nombre completo</label>
+      <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input type="text" id="nombre" placeholder="Juan Pérez" minlength="3" required/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="email" placeholder="juan@correo.com" required/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Teléfono</label>
+      <div class="input-wrap">
+        <span class="input-icon">📱</span>
+        <input type="tel" id="telefono" placeholder="+57 300 000 0000" required/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Documento</label>
+      <div class="input-wrap">
+        <span class="input-icon">🪪</span>
+        <input type="text" id="documento" placeholder="1234567890" required/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="contrasena" placeholder="Mínimo 6 caracteres" minlength="6" required/>
+      </div>
+    </div>
 
-        // =============================================
-        // Referencias del DOM
-        // =============================================
-        const form = document.getElementById('registroForm');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const mensajeDiv = document.getElementById('mensaje');
+    <button class="btn" id="btnRegistro" onclick="registrar()">Crear cuenta</button>
+    <div class="msg" id="msg"></div>
 
-        // Función para mostrar mensajes
-        function mostrarMensaje(texto, tipo) {
-            mensajeDiv.textContent = texto;
-            mensajeDiv.className = 'message ' + tipo;
-        }
+    <div class="footer-link">
+      ¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a>
+    </div>
+  </div>
 
-        // =============================================
-        // Verificar que Supabase se cargó correctamente
-        // =============================================
-        let supabaseClient = null;
+  <script>
+    const SUPABASE_URL = 'https://hfljxypougtleafgfhsf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmbGp4eXBvdWd0bGVhZmdmaHNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzczODksImV4cCI6MjA5Mjk1MzM4OX0.GkW2NjuJ0tS1AzE5GuyCZVIFoS0iHxl6wRvd_frWwsI';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        try {
-            if (!window.supabase || !window.supabase.createClient) {
-                throw new Error('El SDK de Supabase no se cargó. Verifica tu conexión a internet.');
-            }
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('✅ Supabase conectado correctamente');
-        } catch (err) {
-            console.error('❌ Error al inicializar Supabase:', err);
-            mostrarMensaje('❌ Error: No se pudo conectar con la base de datos. Revisa la consola (F12).', 'error');
-        }
+    function showMsg(text, type) {
+      const el = document.getElementById('msg');
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
 
-        // =============================================
-        // 📨 ENVÍO DEL FORMULARIO
-        // =============================================
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+    async function registrar() {
+      const btn = document.getElementById('btnRegistro');
+      const nombre     = document.getElementById('nombre').value.trim();
+      const email      = document.getElementById('email').value.trim();
+      const telefono   = document.getElementById('telefono').value.trim();
+      const documento  = document.getElementById('documento').value.trim();
+      const contrasena = document.getElementById('contrasena').value;
 
-            // Verificar que Supabase está listo
-            if (!supabaseClient) {
-                mostrarMensaje('❌ Error: Supabase no está inicializado. Recarga la página.', 'error');
-                return;
-            }
+      if (!nombre || nombre.length < 3) return showMsg('⚠️ El nombre debe tener al menos 3 caracteres.', 'error');
+      if (!email)      return showMsg('⚠️ Ingresa un correo válido.', 'error');
+      if (!telefono)   return showMsg('⚠️ Ingresa tu teléfono.', 'error');
+      if (!documento)  return showMsg('⚠️ Ingresa tu documento.', 'error');
+      if (contrasena.length < 6) return showMsg('⚠️ La contraseña debe tener al menos 6 caracteres.', 'error');
 
-            // Mostrar estado de carga en el botón
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<span class="spinner"></span> Registrando...';
-            mensajeDiv.className = 'message'; // Ocultar mensaje anterior
-            mensajeDiv.textContent = '';
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Registrando...';
 
-            // Recoger los datos del formulario
-            const datos = {
-                nombre:    document.getElementById('nombre').value.trim(),
-                email:     document.getElementById('email').value.trim(),
-                telefono:  document.getElementById('telefono').value.trim(),
-                documento: document.getElementById('documento').value.trim(),
-                contrasena: document.getElementById('contrasena').value
-            };
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({ email, password: contrasena });
+        if (authError) throw authError;
 
-            console.log('📤 Enviando datos:', JSON.stringify(datos));
+        const userId = authData.user?.id;
+        if (!userId) throw new Error('No se pudo obtener el ID del usuario.');
 
-            try {
-                const { data, error } = await supabaseClient
-                    .from('registros')
-                    .insert([datos])
-                    .select();
+        const { error: perfilError } = await supabase
+          .from('perfiles')
+          .insert([{ id: userId, nombre, telefono, documento }]);
+        if (perfilError) throw perfilError;
 
-                console.log('📥 Respuesta de Supabase:', { data, error });
+        showMsg('✅ ¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+        setTimeout(() => window.location.href = 'login.html', 2000);
 
-                if (error) {
-                    throw error;
-                }
-
-                // ✅ Éxito
-                mostrarMensaje('✅ ¡Registro exitoso! Tus datos han sido guardados.', 'success');
-                form.reset();
-
-            } catch (error) {
-                console.error('❌ Error al registrar:', error);
-
-                let errorMsg = 'No se pudo completar el registro.';
-                if (error.message) {
-                    errorMsg = error.message;
-                }
-                if (error.code === '23505') {
-                    errorMsg = 'Ya existe un registro con ese documento o correo electrónico.';
-                }
-                if (error.code === '42501') {
-                    errorMsg = 'Permisos insuficientes. Verifica las políticas RLS de la tabla.';
-                }
-
-                mostrarMensaje('❌ Error: ' + errorMsg, 'error');
-            } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = 'Registrarse';
-            }
-        });
-    </script>
-
+      } catch (err) {
+        if (err.message?.includes('already registered')) showMsg('❌ Este correo ya está registrado.', 'error');
+        else if (err.code === '23505') showMsg('❌ Ya existe un usuario con ese documento.', 'error');
+        else showMsg('❌ ' + (err.message || 'Error al registrar.'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Crear cuenta';
+      }
+    }
+  </script>
 </body>
 </html>
